@@ -1,2 +1,3 @@
 # Connect-4
-Building a connect 4 game with an AI bot to play against.
+Building Connect 4 game with pygame
+Creating an AI bot to play against
