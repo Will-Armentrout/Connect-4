@@ -137,6 +137,7 @@ class GameBoard(object):
                     #Checking if the row is a winner
                     if count >= 4:
                         print(cell + ' wins.')
+                        break
             
             #Looping through the middle column to check the diagonal wins
             for i in range(6):
@@ -146,9 +147,61 @@ class GameBoard(object):
                     #Initializing Loop Variables
                     count = 1
 
+                    #Checking the Upper Left
+                    j = 2
+                    row = i - 1
+                    while j >= 0 and row >= 0:
+                        if self.board[row][j] == cell:
+                            count += 1
+                        else:
+                            break
+                        j -= 1
+                        row -= 1
+
+
+                    #Checking the Lower Right
+                    j = 4
+                    row = i + 1
+                    while j >= 0 and row <= 5:
+                        if self.board[row][j] == cell:
+                            count += 1
+                        else:
+                            break
+                        j += 1
+                        row += 1
+
                     #Checking if the row is a winner
                     if count >= 4:
                         print(cell + ' wins.')
+                        break
+
+                    count = 1
+
+                    #Checking the Lower Left
+                    j = 2
+                    row = i + 1
+                    while j >= 0 and row <= 5:
+                        if self.board[row][j] == cell:
+                            count += 1
+                        else:
+                            break
+                        j -= 1
+                        row += 1
+
+                    #Checking the Upper Right
+                    j = 4
+                    row = i - 1
+                    while j <= 6 and row >= 0:
+                        if self.board[row][j] == cell:
+                            count += 1
+                        else:
+                            break
+                        j += 1
+                        row -= 1
+
+                    if count >= 4:
+                        print(cell + ' wins.')
+                        break
 
 
 #Function to Redraw the game window
