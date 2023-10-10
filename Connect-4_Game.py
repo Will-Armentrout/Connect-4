@@ -42,7 +42,115 @@ class Piece(object):
     #Function to draw the piece on the screen
     def draw(self, window):
         window.blit(self.img, (self.x - self.width // 2, self.y - self.height // 2))
+
+class GameBoard(object):
+    def __init__(self, board, numPieces):
+        self.board = board
+        self.numPieces = numPieces
+
+    def draw(self, window):
+        #Drawing the GameBoard
+        window.blit(gameBoard, ((screenWidth // 2) - (gameBoard.get_width() // 2), (screenHeight // 2) - (gameBoard.get_height() // 2) + 100))
         
+        #Drawing the Pieces already placed
+        #Looping through the rows
+        for i in range(len(self.board)):
+            #Looping the Columns
+            for j in range(len(self.board[0])):
+                elem = self.board[i][j]
+                if elem == 'N':
+                    continue
+                else:
+                    if elem == 'Red':
+                        img = redPiece
+                    elif elem == 'Yellow':
+                        img = yellowPiece
+                    
+                    row = i 
+                    col = j
+                    xPosPiece = 120 + j*126
+                    yPosPiece = 284 + i*126
+                    window.blit(img, (xPosPiece - 107 // 2, yPosPiece - 107 // 2))
+
+    #Finish the Method to find a finished game
+    def gameStateCalc(self):
+        #Checking Number of Pieces
+        if self.numPieces >= 7:
+            #Looping through the middle column to check horizontal wins
+            for i in range(6):
+                cell = self.board[i][3]
+                if cell != 'N':
+                    
+                    #Initializing Loop Variables
+                    count = 1
+
+                    #Checking to the Left
+                    j = 2
+                    while j >= 0:
+                        if self.board[i][j] == cell:
+                            count += 1
+                        else:
+                            break
+                        j -= 1
+                    
+                    #Checking to the Right
+                    j = 4
+                    while j <= 6:
+                        if self.board[i][j] == cell:
+                            count += 1
+                        else:
+                            break
+
+                        j += 1
+                    
+                    #Checking if the row is a winner
+                    if count >= 4:
+                        print(cell + ' wins.')
+            
+            #Looping through the third row to check vertical wins
+            for i in range(7):
+                cell = self.board[3][i]
+                if cell != 'N':
+                    
+                    #Initializing Loop Variables
+                    count = 1
+
+                    #Checking Above
+                    j = 2
+                    while j >= 0:
+                        if self.board[j][i] == cell:
+                            count += 1
+                        else:
+                            break
+                        j -= 1
+                    
+                    #Checking Below
+                    j = 4
+                    while j <= 5:
+                        if self.board[j][i] == cell:
+                            count += 1
+                        else:
+                            break
+
+                        j += 1
+                    
+                    #Checking if the row is a winner
+                    if count >= 4:
+                        print(cell + ' wins.')
+            
+            #Looping through the middle column to check the diagonal wins
+            for i in range(6):
+                cell = self.board[i][3]
+                if cell != 'N':
+                    
+                    #Initializing Loop Variables
+                    count = 1
+
+                    #Checking if the row is a winner
+                    if count >= 4:
+                        print(cell + ' wins.')
+
+
 #Function to Redraw the game window
 def redrawGameWindow():
     #Coloring in the Background
@@ -54,30 +162,13 @@ def redrawGameWindow():
     window.blit(title, (screenWidth // 2 - title.get_width() // 2, title.get_height() // 2))
 
     #Drawing the Piece in Play
-    for piece in pieces:
-        piece.draw(window)
+    piece.draw(window)
 
     #Drawing the Gameboard
-    window.blit(gameBoard, ((screenWidth // 2) - (gameBoard.get_width() // 2), (screenHeight // 2) - (gameBoard.get_height() // 2) + 100))
+    board.draw(window)
 
 
     pygame.display.update()
-
-#Function to detect if someone has won
-def gameState(board):
-    hasEnded = False
-    winner = 'none'
-    #Looping the Rows
-    for i in range(len(board)):
-        #Looping the Columns
-        for j in range(len(board[0])):
-            elem = board[i][j]
-            if elem == 'N':
-                continue
-            else:
-                pass
-    
-    return hasEnded, winner
 
 #Main Game Loop
 
@@ -87,9 +178,9 @@ isPlaying = True
 addPiece = True
 isUpdated = False
 turn = 'Red'
-pieces = []
 rows, cols = (6, 7)
-board = [['N' for _ in range(cols)] for _ in range(rows)]
+placedPieces = [['N' for _ in range(cols)] for _ in range(rows)]
+board = GameBoard(placedPieces, 0)
 while run:
     #30 FPS Refresh Rate
     clock.tick(30)
@@ -99,122 +190,59 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     
-    #Getting the Mouse Cursor Position
-    mousePos = pygame.mouse.get_pos()
-
-    if addPiece:
-        pieces.append(Piece(120, 150, 107, 107, turn))
-        addPiece = False
-
-    #Two States of the Game - Selection Amination and Falling Animation
+    #Game Playing
     if isPlaying:
+
+        #Getting the Mouse Cursor Position
+        mousePos = pygame.mouse.get_pos()
+
+        if addPiece:
+            piece = Piece(120, 150, 107, 107, turn)
+            addPiece = False
+
+        if board.numPieces >= 7:
+            board.gameStateCalc()
+
         #Initializing the Piece
         if mousePos[0] < 128 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 120
+            col = 0
         elif mousePos[0] < 254 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 246
+            col = 1
         elif mousePos[0] < 380 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 372
+            col = 2
         elif mousePos[0] < 506 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 498
+            col = 3
         elif mousePos[0] < 632 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 624
+            col = 4
         elif mousePos[0] < 758 + (screenWidth // 2) - (gameBoard.get_width() // 2):
-            xPos = 750
+            col = 5
         else:
-            xPos = 876
+            col = 6
 
+        #Setting the Piece position
         yPos = 150
-        pieces[pieces.__len__() - 1].x = xPos
+        xPos = 120 + 126*col
+        piece.x = xPos
 
-        if pygame.mouse.get_pressed()[0]:
-            isPlaying = False
+        #Putting the piece onto the board
+        if pygame.mouse.get_pressed()[0] and board.board[0][col] == 'N':
+            for i in range(6):
+                if board.board[i][col] != 'N':
+                    break
+                i += 1
+            board.board[i - 1][col] = turn
+
+            #Switch player who's turn it is
+            if turn == 'Yellow':
+                turn = 'Red'
+            else:
+                turn = 'Yellow'
+
+            #Update loop variables
+            addPiece = True
+            board.numPieces += 1
             pygame.time.delay(150)
 
-    #Need to add collision avoidance if column is full
-    else:
-        if ~isUpdated:
-            if pieces[pieces.__len__() - 1].x == 120 and board[0][0] == 'N':
-                for i in range(6):
-                    if board[i][0] != 'N':
-                        break
-                    i += 1
-                board[i - 1][0] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 246 and board[0][1] == 'N':
-                for i in range(6):
-                    if board[i][1] != 'N':
-                        break
-                    i += 1
-                board[i - 1][1] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 372 and board[0][2] == 'N':
-                for i in range(6):
-                    if board[i][2] != 'N':
-                        break    
-                    i += 1
-                board[i - 1][2] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 498 and board[0][3] == 'N':
-                for i in range(6):
-                    if board[i][3] != 'N':
-                        break 
-                    i += 1
-                board[i - 1][3] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 624 and board[0][4] == 'N':
-                for i in range(6):
-                    if board[i][4] != 'N':
-                        break
-                    i += 1
-                board[i - 1][4] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 750 and board[0][5] == 'N':
-                for i in range(6):
-                    if board[i][5] != 'N':
-                        break
-                    i += 1
-                board[i - 1][5] = turn
-                isUpdated = True
-            
-            elif pieces[pieces.__len__() - 1].x == 876 and board[0][6] == 'N':
-                for i in range(6):
-                    if board[i][6] != 'N':
-                        break
-                    i += 1
-                board[i - 1][6] = turn
-                isUpdated = True
-        
-        #See current game state
-        print(board)
-        hasEnded, winner = gameState(board)
-
-        #Display Winner
-        if hasEnded:
-            if winner == 'Red':
-                print('Red Wins')
-            else:
-                print('Yellow Wins')
-            
-
-        #Switch player who's turn it is
-        if turn == 'Yellow':
-            turn = 'Red'
-        else:
-            turn = 'Yellow'
-
-        #Switching to the playing state
-        addPiece = True
-        isUpdated = False
-        isPlaying = True
-
-
-    
     redrawGameWindow()
 
 
